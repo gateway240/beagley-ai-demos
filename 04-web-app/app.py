@@ -9,13 +9,9 @@ from tflite_runtime.interpreter import Interpreter, load_delegate
 video_driver_id = 0
 # video_driver_id = 3
 
-camera = cv2.VideoCapture(video_driver_id)
-# Only for CSI Camera
-camera.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'RGGB'))
-
 app = Flask(__name__)
 
-global model_path
+global camera, model_path
 global args, capture, grey, switch, neg, out, frame_rate_calc, obj_detect
 capture = 0
 grey = 0
@@ -136,6 +132,7 @@ def tasks():
                 cv2.destroyAllWindows()
             else:
                 camera = cv2.VideoCapture(video_driver_id)
+                # camera.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'RGGB'))
                 switch = 1
 
 
