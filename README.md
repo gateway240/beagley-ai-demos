@@ -97,9 +97,9 @@ If you are not directly observing your output, a hint that these settings are wr
 pipeline (ex. object detection) is running but nothing is being detected or recognized.
 
 ```bash
-v4l2-ctl -d /dev/v4l-subdev2 --set-ctrl=digital_gain=1024
-v4l2-ctl -d /dev/v4l-subdev2 --set-ctrl=analogue_gain=100
-v4l2-ctl -d /dev/v4l-subdev2 --set-ctrl=exposure=1000
+v4l2-ctl -d /dev/v4l-subdev2 --set-ctrl=digital_gain=2048
+v4l2-ctl -d /dev/v4l-subdev2 --set-ctrl=analogue_gain=230
+v4l2-ctl -d /dev/v4l-subdev2 --set-ctrl=exposure=1750
 ```
 
 ## Capturing Test Frames
