@@ -1,3 +1,5 @@
 flask==3.1.0
 opencv-python==4.11.0.86
+tflite-runtime==2.14.0
+numpy==1.26.4
 black

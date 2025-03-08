@@ -1,23 +1,92 @@
-from flask import Flask, render_template, Response, request
+import os
+import argparse
+from flask import Flask, render_template, request, Response
 import cv2
+import numpy as np
+from tflite_runtime.interpreter import Interpreter, load_delegate
+
+# Toggle depending on environment
+video_driver_id = 0
+# video_driver_id = 3
+
+camera = cv2.VideoCapture(video_driver_id)
+# Only for CSI Camera
+camera.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'RGGB'))
 
 app = Flask(__name__)
 
-global capture, grey, switch, neg, out
+global interpreter
+global args, capture, grey, switch, neg, out, frame_rate_calc, obj_detect
 capture = 0
 grey = 0
 neg = 0
+obj_detect = 0
 switch = 1
+frame_rate_calc = 1
+
+def load_labels(labelmap_path: str):
+    """Loads labels from a label map file."""
+    try:
+        with open(labelmap_path, 'r') as f:
+            labels = [line.strip() for line in f.readlines()]
+        if labels[0] == '???':
+            labels.pop(0)
+        return labels
+    except IOError as e:
+        print(f"Error reading label map file: {e}")
 
 def capture_by_frames():
-    global out, capture
+    global interpreter
+    global args, out, capture, frame_rate_calc
+    freq = cv2.getTickFrequency()
+    
+    interpreter.allocate_tensors()
+    # Get model details
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    height, width = input_details[0]['shape'][1:3]
+    floating_model = (input_details[0]['dtype'] == np.float32)
+
+    outname = output_details[0]['name']
+    boxes_idx, classes_idx, scores_idx = (1, 3, 0) if 'StatefulPartitionedCall' in outname else (0, 1, 2)
+
     while True:
+        t1 = cv2.getTickCount()
         success, frame = camera.read()  # read the camera frame
         if success:
             if(grey):
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             if(neg):
-                frame=cv2.bitwise_not(frame)    
+                frame=cv2.bitwise_not(frame)  
+            if(obj_detect):
+                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                frame_resized = cv2.resize(frame_rgb, (width, height))
+                input_data = np.expand_dims(frame_resized, axis=0)
+                if floating_model:
+                    input_data = (np.float32(input_data) - 127.5) / 127.5
+
+                interpreter.set_tensor(input_details[0]['index'], input_data)
+                interpreter.invoke()
+
+                boxes = interpreter.get_tensor(output_details[boxes_idx]['index'])[0]
+                classes = interpreter.get_tensor(output_details[classes_idx]['index'])[0]
+                scores = interpreter.get_tensor(output_details[scores_idx]['index'])[0]
+                for i in range(len(scores)):
+                    if min_conf_threshold < scores[i] <= 1.0:
+                        ymin, xmin, ymax, xmax = [int(coord) for coord in (boxes[i] * [resH, resW, resH, resW])]
+                        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (10, 255, 0), 2)
+                        object_name = labels[int(classes[i])]
+                        label = f'{object_name}: {int(scores[i] * 100)}%'
+                        print(label)
+                        labelSize, baseLine = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+                        label_ymin = max(ymin, labelSize[1] + 10)
+                        cv2.rectangle(frame, (xmin, label_ymin - labelSize[1] - 10), (xmin + labelSize[0], label_ymin + baseLine - 10), (255, 255, 255), cv2.FILLED)
+                        cv2.putText(frame, label, (xmin, label_ymin - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+                cv2.putText(frame, f'FPS: {frame_rate_calc:.2f}', (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
+
+            t2 = cv2.getTickCount()
+            time1 = (t2 - t1) / freq
+            frame_rate_calc = 1 / time1
             try: 
                 ret, buffer = cv2.imencode(".jpg", frame)
                 frame = buffer.tobytes()
@@ -51,6 +120,9 @@ def tasks():
         elif request.form.get("neg") == "Negative":
             global neg
             neg = not neg
+        elif request.form.get("objDetect") == "Object Detect":
+            global obj_detect
+            obj_detect = not obj_detect
         elif request.form.get("face") == "Face Only":
             global face
             face = not face
@@ -70,11 +142,29 @@ def tasks():
         return render_template("index.html")
     return render_template("index.html")
 
-
-
-camera = cv2.VideoCapture(0)
-
 if __name__ == "__main__":
+    global interpreter
+    # Argument parsing
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--modeldir', required=True, help='Folder the .tflite file is located in')
+    parser.add_argument('--graph', default='detect.tflite', help='Name of the .tflite file')
+    parser.add_argument('--labels', default='labelmap.txt', help='Name of the labelmap file')
+    parser.add_argument('--threshold', default='0.5', help='Minimum confidence threshold')
+    parser.add_argument('--resolution', default='1280x720', help='Desired webcam resolution')
+    args = parser.parse_args()
+
+    # Configuration
+    model_path = os.path.join(os.getcwd(), args.modeldir, args.graph)
+    labelmap_path = os.path.join(os.getcwd(), args.modeldir, args.labels)
+    min_conf_threshold = float(args.threshold)
+    resW, resH = map(int, args.resolution.split('x'))
+
+    # Load labels and interpreter
+    labels = load_labels(labelmap_path)
+    interpreter = Interpreter(model_path=model_path)
+
+
+
     app.run(debug=True, use_reloader=False, port=40000)
 
 camera.release()

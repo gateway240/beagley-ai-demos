@@ -51,7 +51,7 @@ and [this guide](https://medium.com/@draj0718/opencv-face-detection-deployment-i
 
 From the `04-web-app` directory
 ```bash
-source .venv/bin/activate
+conda activate myenv
 pip install -r requirements.txt
 python app.py
 ```
