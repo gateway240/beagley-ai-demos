@@ -43,6 +43,19 @@ The python script in this repository contains small modification to function wit
 By default, the CSI camera registers under `/dev/video3` but if this is not the case,
 you will need to change the `video_driver_id` in the script.
 
+## 04 Web App
+
+This is an object detection webapp on port 40000.
+Inspiration from [this guide](https://medium.com/better-programming/build-a-computer-vision-webapp-flask-opencv-and-mongodb-62a52d38738a)
+and [this guide](https://medium.com/@draj0718/opencv-face-detection-deployment-in-flask-web-framework-1a9b9772d9fd)
+
+From the `04-web-app` directory
+```bash
+source .venv/bin/activate
+pip install -r requirements.txt
+python app.py
+```
+
 # Using an IMX219 CSI Camera
 
 Based on [this tutorial](https://docs.beagleboard.org/boards/beagley/ai/demos/beagley-ai-using-imx219-csi-cameras.html).

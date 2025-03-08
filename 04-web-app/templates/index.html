@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<title>Face Detection</title>
+
+<body>
+    <div class="container">
+        <center>
+            <h2>Object Detection</h2>
+        </center>
+        <div>
+            <center>
+                <form method="post" action="{{ url_for('tasks') }}">
+                    <input type="submit" value="Stop/Start" name="stop" />
+                    <input type="submit" value="Capture" name="click" />
+                    <input type="submit" value="Grey" name="grey" />
+                    <input type="submit" value="Negative" name="neg" />
+                </form>
+            </center>
+        </div>
+        <br>
+        <div>
+            <center>
+                <img src="{{ url_for('video_capture') }}" height="80%" width="80%">
+            </center>
+        </div>
+    </div>
+</body>
+
+</html>
