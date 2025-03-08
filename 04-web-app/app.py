@@ -162,7 +162,7 @@ if __name__ == "__main__":
 
     # Load labels and interpreter
     labels = load_labels(labelmap_path)
-    app.run(debug=True, use_reloader=False, port=40000)
+    app.run(host="0.0.0.0", debug=True, use_reloader=False, port=40000)
 
 camera.release()
 cv2.destroyAllWindows()
