@@ -15,7 +15,7 @@ camera.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'RGGB'))
 
 app = Flask(__name__)
 
-global interpreter
+global model_path
 global args, capture, grey, switch, neg, out, frame_rate_calc, obj_detect
 capture = 0
 grey = 0
@@ -36,10 +36,11 @@ def load_labels(labelmap_path: str):
         print(f"Error reading label map file: {e}")
 
 def capture_by_frames():
-    global interpreter
+    global model_path
     global args, out, capture, frame_rate_calc
     freq = cv2.getTickFrequency()
     
+    interpreter = Interpreter(model_path=model_path)
     interpreter.allocate_tensors()
     # Get model details
     input_details = interpreter.get_input_details()
@@ -134,7 +135,7 @@ def tasks():
                 camera.release()
                 cv2.destroyAllWindows()
             else:
-                camera = cv2.VideoCapture(0)
+                camera = cv2.VideoCapture(video_driver_id)
                 switch = 1
 
 
@@ -143,7 +144,7 @@ def tasks():
     return render_template("index.html")
 
 if __name__ == "__main__":
-    global interpreter
+    global model_path
     # Argument parsing
     parser = argparse.ArgumentParser()
     parser.add_argument('--modeldir', required=True, help='Folder the .tflite file is located in')
@@ -161,10 +162,6 @@ if __name__ == "__main__":
 
     # Load labels and interpreter
     labels = load_labels(labelmap_path)
-    interpreter = Interpreter(model_path=model_path)
-
-
-
     app.run(debug=True, use_reloader=False, port=40000)
 
 camera.release()

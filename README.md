@@ -53,7 +53,7 @@ From the `04-web-app` directory
 ```bash
 conda activate myenv
 pip install -r requirements.txt
-python app.py
+python app.py --modeldir=TFLite_model
 ```
 
 # Using an IMX219 CSI Camera
