@@ -6,8 +6,8 @@ import numpy as np
 from tflite_runtime.interpreter import Interpreter, load_delegate
 
 # Toggle depending on environment
-# video_driver_id = 0
-video_driver_id = 3
+video_driver_id = 0
+# video_driver_id = 3
 
 app = Flask(__name__)
 
@@ -17,8 +17,10 @@ capture = 0
 grey = 0
 neg = 0
 obj_detect = 0
-switch = 0
+switch = 1
 frame_rate_calc = 1
+
+camera = None
 
 def load_labels(labelmap_path: str):
     """Loads labels from a label map file."""
@@ -32,7 +34,7 @@ def load_labels(labelmap_path: str):
         print(f"Error reading label map file: {e}")
 
 def capture_by_frames():
-    global model_path
+    global model_path, camera
     global args, out, capture, frame_rate_calc
     freq = cv2.getTickFrequency()
     
@@ -47,7 +49,7 @@ def capture_by_frames():
     outname = output_details[0]['name']
     boxes_idx, classes_idx, scores_idx = (1, 3, 0) if 'StatefulPartitionedCall' in outname else (0, 1, 2)
 
-    while True:
+    while True and camera is not None:
         t1 = cv2.getTickCount()
         success, frame = camera.read()  # read the camera frame
         if success:
@@ -127,12 +129,13 @@ def tasks():
             face = not face
             if face:
                 time.sleep(4)
-        elif request.form.get("stop") == "Stop/Start":
+        elif request.form.get("start") == "Start/Stop":
             try:
                 if switch == 1:
                     switch = 0
-                    camera.release()
-                    cv2.destroyAllWindows()
+                    if camera is not None:
+                        camera.release()
+                        cv2.destroyAllWindows()
                 else:
                     camera = cv2.VideoCapture(video_driver_id)
                     if video_driver_id == 3:
@@ -169,3 +172,6 @@ if __name__ == "__main__":
     labels = load_labels(labelmap_path)
     app.run(host="0.0.0.0", debug=True, use_reloader=False, port=40000)
 
+if camera is not None:
+    camera.release()
+    cv2.destroyAllWindows()
