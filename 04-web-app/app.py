@@ -49,10 +49,8 @@ def capture_by_frames():
     outname = output_details[0]['name']
     boxes_idx, classes_idx, scores_idx = (1, 3, 0) if 'StatefulPartitionedCall' in outname else (0, 1, 2)
 
-    while True:
+    while True and camera is not None:
         t1 = cv2.getTickCount()
-        if camera is None:
-            continue
         success, frame = camera.read()  # read the camera frame
         if success:
             # print(frame.shape)
