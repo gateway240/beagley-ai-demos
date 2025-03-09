@@ -6,8 +6,8 @@ import numpy as np
 from tflite_runtime.interpreter import Interpreter, load_delegate
 
 # Toggle depending on environment
-video_driver_id = 0
-# video_driver_id = 3
+# video_driver_id = 0
+video_driver_id = 3
 
 app = Flask(__name__)
 
@@ -17,7 +17,7 @@ capture = 0
 grey = 0
 neg = 0
 obj_detect = 0
-switch = 1
+switch = 0
 frame_rate_calc = 1
 
 def load_labels(labelmap_path: str):
@@ -51,6 +51,7 @@ def capture_by_frames():
         t1 = cv2.getTickCount()
         success, frame = camera.read()  # read the camera frame
         if success:
+            print(frame.shape)
             if(grey):
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             if(neg):
@@ -89,6 +90,7 @@ def capture_by_frames():
                 frame = buffer.tobytes()
                 yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n")
             except Exception as e:
+                print("Error in frame delivery!")
                 pass
         else:
             pass
@@ -126,14 +128,20 @@ def tasks():
             if face:
                 time.sleep(4)
         elif request.form.get("stop") == "Stop/Start":
-            if switch == 1:
-                switch = 0
-                camera.release()
-                cv2.destroyAllWindows()
-            else:
-                camera = cv2.VideoCapture(video_driver_id)
-                # camera.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'RGGB'))
-                switch = 1
+            try:
+                if switch == 1:
+                    switch = 0
+                    camera.release()
+                    cv2.destroyAllWindows()
+                else:
+                    camera = cv2.VideoCapture(video_driver_id)
+                    if video_driver_id == 3:
+                        camera.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'RGGB'))
+                    switch = 1
+            except NameError:
+                print("Camera undefined!!")
+            except Exception:
+                print("Unknown Error!!")
 
 
     elif request.method == "GET":
@@ -161,5 +169,3 @@ if __name__ == "__main__":
     labels = load_labels(labelmap_path)
     app.run(host="0.0.0.0", debug=True, use_reloader=False, port=40000)
 
-camera.release()
-cv2.destroyAllWindows()
