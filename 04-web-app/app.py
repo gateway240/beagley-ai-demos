@@ -55,7 +55,7 @@ def capture_by_frames():
             continue
         success, frame = camera.read()  # read the camera frame
         if success:
-            print(frame.shape)
+            # print(frame.shape)
             if(grey):
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             if(neg):

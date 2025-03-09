@@ -96,10 +96,19 @@ for your own lighting environment.
 If you are not directly observing your output, a hint that these settings are wrong is that your
 pipeline (ex. object detection) is running but nothing is being detected or recognized.
 
+Indoor Light
 ```bash
 v4l2-ctl -d /dev/v4l-subdev2 --set-ctrl=digital_gain=2048
 v4l2-ctl -d /dev/v4l-subdev2 --set-ctrl=analogue_gain=230
 v4l2-ctl -d /dev/v4l-subdev2 --set-ctrl=exposure=1750
+```
+
+Natural Light
+
+```bash
+v4l2-ctl -d /dev/v4l-subdev2 --set-ctrl=digital_gain=1000
+v4l2-ctl -d /dev/v4l-subdev2 --set-ctrl=analogue_gain=100
+v4l2-ctl -d /dev/v4l-subdev2 --set-ctrl=exposure=1000
 ```
 
 ## Capturing Test Frames
