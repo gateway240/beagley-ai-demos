@@ -6,8 +6,8 @@ import numpy as np
 from tflite_runtime.interpreter import Interpreter, load_delegate
 
 # Toggle depending on environment
-video_driver_id = 0
-# video_driver_id = 3
+# video_driver_id = 0
+video_driver_id = 3
 
 app = Flask(__name__)
 
@@ -49,8 +49,10 @@ def capture_by_frames():
     outname = output_details[0]['name']
     boxes_idx, classes_idx, scores_idx = (1, 3, 0) if 'StatefulPartitionedCall' in outname else (0, 1, 2)
 
-    while True and camera is not None:
+    while True:
         t1 = cv2.getTickCount()
+        if camera is None:
+            continue
         success, frame = camera.read()  # read the camera frame
         if success:
             print(frame.shape)
