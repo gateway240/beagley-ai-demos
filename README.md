@@ -4,7 +4,7 @@ A collection of demos showing the functionality of the BeagleY-AI development bo
 
 ## 01 Led Blink
 
-Based on [this tutorial](https://docs.beagleboard.org/boards/beagley/ai/demos/beagley-ai-using-gpio.html).
+Based on [this tutorial](https://docs.beagleboard.org/boards/beagley/ai/demos/using-gpio.html).
 
 In this repository, the python code used an outdated library of `gpiod`.
 The included python code runs on the BeagleY-AI with a current python venv from within the directory:
@@ -16,7 +16,7 @@ source .venv/bin/activate
 
 ### PWM
 
-Based on [this tutorial](https://docs.beagleboard.org/boards/beagley/ai/demos/beagley-ai-using-pwm.html).
+Based on [this tutorial](https://docs.beagleboard.org/boards/beagley/ai/demos/using-pwm.html).
 
 > NOTE: If you use any GPIO command on the same port the PWM will no longer work.
 
@@ -32,7 +32,7 @@ gcc -o benchmark-csv benchmark-csv.c algorithms.c
 
 ## 03 Object Detection
 
-Based on [this guide](https://docs.beagleboard.org/boards/beagley/ai/demos/beagley-ai-object-detection-tutorial.html).
+Based on [this guide](https://docs.beagleboard.org/boards/beagley/ai/demos/object-detection-tutorial.html).
 Follow the directions in the guide to configure the python virtual environment and machine learning code.
 
 The python script in this repository contains small modification to function with CSI cameras:
@@ -58,7 +58,7 @@ python app.py --modeldir=TFLite_model
 
 # Using an IMX219 CSI Camera
 
-Based on [this tutorial](https://docs.beagleboard.org/boards/beagley/ai/demos/beagley-ai-using-imx219-csi-cameras.html).
+Based on [this tutorial](https://docs.beagleboard.org/boards/beagley/ai/demos/using-imx219-csi-cameras.html).
 The code in this section has been tested specifically with the [Raspberry Pi Camera V2 Module](https://www.raspberrypi.com/products/camera-module-v2/).
 
 If you are used to using webcams this camera is much less "plug and play" and requires more in-depth knowledge of camera capture.
